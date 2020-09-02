@@ -1,0 +1,65 @@
+# Ensure GOBIN is not set during build so that promu is installed to the correct path
+unexport GOBIN
+
+# VARIABLES
+PACKAGE="github.com/criteo/go-biggraphite"
+GO_VERSION   ?= $(shell $(GO) version)
+GO           ?= go
+GO111MODULE := on
+
+GOFMT  ?= $(GO)fmt
+GOTEST := $(GO) test
+GOTEST_DIR :=
+
+FIRST_GOPATH := $(firstword $(subst :, ,$(shell $(GO) env GOPATH)))
+GOOPTS       ?=
+
+PROMU        := $(FIRST_GOPATH)/bin/promu
+pkgs          = ./...
+
+PREFIX                  ?= $(shell pwd)
+BIN_DIR                 ?= $(shell pwd)
+
+GOHOSTOS     ?= $(shell $(GO) env GOHOSTOS)
+GOHOSTARCH   ?= $(shell $(GO) env GOHOSTARCH)
+
+ifeq (arm, $(GOHOSTARCH))
+	GOHOSTARM ?= $(shell GOARM= $(GO) env GOARM)
+	GO_BUILD_PLATFORM ?= $(GOHOSTOS)-$(GOHOSTARCH)v$(GOHOSTARM)
+else
+	GO_BUILD_PLATFORM ?= $(GOHOSTOS)-$(GOHOSTARCH)
+
+endif
+PROMU_VERSION ?= 0.6.0
+PROMU_URL     := https://github.com/prometheus/promu/releases/download/v$(PROMU_VERSION)/promu-$(PROMU_VERSION).$(GO_BUILD_PLATFORM).tar.gz
+
+# This rule is used to forward a target like "build" to "common-build".  This
+# allows a new "build" target to be defined in a Makefile which includes this
+# one and override "common-build" without override warnings.
+%: common-% ;
+
+
+
+.PHONY: common-all
+common-all: build test
+
+.PHONY: promu
+promu: $(PROMU)
+
+$(PROMU):
+	$(eval PROMU_TMP := $(shell mktemp -d))
+	curl -s -L $(PROMU_URL) | tar -xvzf - -C $(PROMU_TMP)
+	mkdir -p $(FIRST_GOPATH)/bin
+	cp $(PROMU_TMP)/promu-$(PROMU_VERSION).$(GO_BUILD_PLATFORM)/promu $(FIRST_GOPATH)/bin/promu
+	rm -r $(PROMU_TMP)
+
+.PHONY: common-build
+common-build: promu
+	@echo ">> building binaries"
+	GO111MODULE=$(GO111MODULE) $(PROMU) build --prefix $(PREFIX) $(PROMU_BINARIES)
+
+.PHONY: common-test
+
+common-test: $(GOTEST_DIR)
+	@echo ">> running all tests"
+	GO111MODULE=$(GO111MODULE) $(GOTEST) $(test-flags) $(GOOPTS) $(pkgs)
