@@ -1,4 +1,13 @@
 language: go
-
 go:
-  - 1.14.x
+- 1.14.x
+env:
+  global:
+    secure: bgbhNt9YcQfBK9zvoTDb/oICrDq2z3rVaUOyDQMBsQ1GkF7loqM9SiLaanZBBtFRTSIpGiBo998J0zgxMwYpHpyBCkWB3swP80AKrgZIQIsU435T5aTOOrHQATb5gDr0/i5tDVhLbDd6gS/3bw7KZuPvtDKfMMcLCMGpZlHBI485VPEZSPTwu1dC9XukuwGCH/GV4UPU55aqHRRrCq0UyFtTEaoandlYgDp5/JRHewc5vTHJzYmnnvayrA8NVLcUdW2DUfziv7xrV/74SaC2LGu2aw33POZMy53IxRLHII+glLGoJPMC9ce4XXDI6kSd+dai6qtAAWGnbxhsD2z07BuPyedsR51O/bPnaK4cGlN2qjl/abHwA9o7asK3cB1Vx/2ndNkLpoyovm5djCEBfyIdU0Zo09/JZzXpZRpVub4BWi2syJgpxuIkHZV4CST3RgVBNq9gU25yzqwmlClMiAK/G2fTseAobkON4WWPRWI5uBjx9S2EUHz7y8IFGJlbrT5WW2J4jiRtATs05GMVmjEDyroIRsugyNgSK5r4e2D/J8fru+fFM9B3mI1oMPUR6qZwLrmkYtSxzo74t/Gmh8clvaoxJq1tenIO/8NtF9gEwJysgWocOJt18nGdkUcfoo7uVVyqGghJsP19AZH28Whp/LkTTosfe/O9I0PSpZI=
+
+install:
+- go get golang.org/x/tools/cmd/cover
+- go get github.com/mattn/goveralls
+script:
+- make
+- make coverage

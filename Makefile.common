@@ -38,8 +38,6 @@ PROMU_URL     := https://github.com/prometheus/promu/releases/download/v$(PROMU_
 # one and override "common-build" without override warnings.
 %: common-% ;
 
-
-
 .PHONY: common-all
 common-all: build test
 
